@@ -1,36 +1,40 @@
+import {parseCode, UnparseCode} from './code-analyzer';
 import $ from 'jquery';
-//import {parseCode,UnparseCode} from './code-analyzer';
-//import {iv} from './v';
-import {pv} from './ast';
-//module.exports={rules:{'no-console':'2',},};
-// import * as escodegen from 'escodegen';
-//var locmap;
-//var parmsmap;
-//let letral;
-$(document).ready(function () {
-    $('#codeSubmissionButton').click(() => {
-        let codeToParse = $('#codePlaceholder').val();
-        // console.log(codeToParse);
-        let myparms = $('#parmsPlaceholder').val();
-        //console.log(myparms);
-        let color =pv(codeToParse,myparms);
-        let res = p(color,color.get(0));
-        $('#parsedCode').html(res);
-    });
-});
-function p(colors,s) {
-    var res='';
-    var xx= s.split('\n');
-    for (let i=0;i<xx.length;i++) {
-        if(colors.has(i+1)){
-            if (colors.get(i+1))
-                res+='<span style=background:green>'+xx[i]+'</span></br>';
-            else res+='<span style=background:red>'+xx[i]+'</span></br>';
-        } else res+=xx[i]+'</br>';
-    }
-    return res;
+import {iv} from './v';
+export {pv};
+var locmap;
+var parmsmap;
+let letral;
+function pv(codeToParse,myparms) {
+    let parsedCode = parseCode(codeToParse,true);
+    //$('#parsedCodeOld').val(JSON.stringify(parsedCode, null, 2));
+    locmap = new Map();
+    parmsmap=new  Map();
+    parsedCode= settheparams(parsedCode);
+    let s=UnparseCode(parsedCode);
+    let parsecode1=parseCode(s,true);
+    var color=iv(parsecode1,myparms,parmsmap);
+    console.log(tostring(color,10));
+    color.set(0,s);
+    let res = p(color,s);
+    return color;
 }
-/*function p(colors,s) {
+function tostring(color,n) {
+    var s='{';
+    for (let i=1;i<n;i++) {
+        if (color.has(i)){
+            if (color.get(i)) {
+                s=s+'(line '+i.toString()+':green'+'),';
+            }else {
+                s=s+'(line '+i.toString()+':red'+'),';
+            }
+        }
+
+    }
+    s=s+'}';
+    return s;
+}
+function p(colors,s) {
     var res='';
     var xx= s.split('\n');
     for (let i=0;i<xx.length;i++) {
@@ -44,26 +48,27 @@ function p(colors,s) {
 }
 function settheparams(x) {
 
-    if (x.type == 'Program') {
-        for (let i = 0; i < x.body.length; i++) {
-            if (x.body[i].type=='VariableDeclaration') {
-                x.body[i]=  variabledeclaration(x.body[i], parmsmap);
-            }else {
-                x.body[i]=f(x.body[i],locmap);
-            }
+    //if (x.type == 'Program') {
+    for (let i = 0; i < x.body.length; i++) {
+        if (x.body[i].type=='VariableDeclaration') {
+            x.body[i]=  variabledeclaration(x.body[i], parmsmap);
+        }else {
+            x.body[i]=f(x.body[i],locmap);
         }
     }
+    //}
     return x;
 }
 function  f(x,mymap) {
     //console.log(locmap.size);
-   // console.log('map length'+mymap.size);
+    // console.log('map length'+mymap.size);
 
-    if (x.type == 'Program') {
+    /* if (x.type == 'Program') {
         for (let i = 0; i < x.body.length; i++) {
             x.body[i]= f(x.body[i],mymap);
         }
     }else
+        */
     if (x.type == 'FunctionDeclaration') { x=functiondeclaration(x,mymap);}else
     if (x.type == 'VariableDeclaration') { x=variabledeclaration(x,mymap);}else {
         x = f1(x,mymap);
@@ -75,7 +80,7 @@ function f1(x,mymap) {
     if (x.type=='ExpressionStatement') {x=expressionstatement(x,mymap);}else
     if (x.type=='IfStatement'){x=ifstatement(x,mymap);}else
     if (x.type=='ReturnStatement') {x=returnstatsment(x,mymap);}else
-    if (x.type=='WhileStatement'){x=whilestatment(x,mymap);}
+        x=whilestatment(x,mymap);
     return x;
 }
 function functiondeclaration(x,mymap) {
@@ -99,7 +104,7 @@ function cleanthbodey(x) {
                 i++;
                 continue;
             }
-          //  console.log(x.body[i].type);
+            //  console.log(x.body[i].type);
             xx[j]=x.body[i];
             j++;
         }
@@ -115,7 +120,7 @@ function iftrue(x,i) {
 }
 function variabledeclaration(x,mymap) {
     //console.log('invarib');
-   // console.log(mymap.size);
+    // console.log(mymap.size);
     for (let i=0;i<x.declarations.length;i++){
         if (x.declarations[i].init==null) {
             mymap.set(x.declarations[i].id.name,null);
@@ -128,7 +133,7 @@ function variabledeclaration(x,mymap) {
     return x;
 }
 function ifstatement(x,mymap) {
-   // console.log('inifim');
+    // console.log('inifim');
     var mymap2=new Map();
     x.test=setthetest(x.test,mymap);
     x.consequent=blockornot(x.consequent,mymap2);
@@ -146,8 +151,8 @@ function whilestatment(x,mymap) {
     return x;
 }
 function expressionstatement(x,mymap) {
-   // console.log(12);
-    if (x.expression.type=='AssignmentExpression'){
+    // console.log(12);
+    //if (x.expression.type=='AssignmentExpression'){
         if (locmap.has(x.expression.left.name)|| mymap.has(x.expression.left.name)){
 
             mymap.set(x.expression.left.name,getvalue(x.expression.right,mymap));
@@ -155,12 +160,12 @@ function expressionstatement(x,mymap) {
         }else {
             x.expression.right=setvaluebinary(x.expression.right,mymap);
         }
-    }
+    //}
     return x;
 }
 function returnstatsment(x,mymap){
-   // console.log('***************************');
-   /// console.log(13);
+    // console.log('***************************');
+    /// console.log(13);
     x.argument=  setvaluebinary(x.argument,mymap);
     return x;
 }
@@ -176,7 +181,7 @@ function blockornot(x,mymap) {
     return x;
 }
 function setthetest(x,mymap) {
-   // console.log('inthetest00');
+    // console.log('inthetest00');
     if (x.type=='BinaryExpression') {
         x.left=setvaluebinary(x.left,mymap);
         x.right=setvaluebinary(x.right,mymap);
@@ -191,8 +196,8 @@ function setthetest(x,mymap) {
 }
 function getvalue(x,mymap) {
     if (x.type=='BinaryExpression') {
-      x.left=  setvaluebinary(x.left,mymap);
-       x.right= setvaluebinary(x.right,mymap);
+        x.left=  setvaluebinary(x.left,mymap);
+        x.right= setvaluebinary(x.right,mymap);
     }
     if (x.type=='Identifier'){
         if (mymap.has(x.name)) {
@@ -203,13 +208,13 @@ function getvalue(x,mymap) {
 }
 
 function setvaluebinary(x,mymap) {
-   // console.log(mymap);
+    // console.log(mymap);
     if (x.type=='Identifier'){
-     //   console.log(mymap.size);
+        //   console.log(mymap.size);
         if (mymap.has(x.name)||locmap.has(x.name)) {
             x= sd(x,mymap);
-          //  let t=UnparseCode(x);
-          //  console.log(t);
+            //  let t=UnparseCode(x);
+            //  console.log(t);
         }
     }else {
         if (x.type=='BinaryExpression') {
@@ -221,19 +226,18 @@ function setvaluebinary(x,mymap) {
     return x;
 }
 function sd(x,mymap) {
-   // console.log(x.name+'1121545');
-   // console.log(mymap);
+    // console.log(x.name+'1121545');
+    // console.log(mymap);
     if (mymap.has(x.name)) {
         x = mymap.get(x.name);
     }else {
         x=locmap.get(x.name);
     }
     //let t=UnparseCode(x);
-   // console.log(t);
-   // console.log(x.type);
+    // console.log(t);
+    // console.log(x.type);
     if (x.type=='Literal') {
         letral=x;
     }
     return x;
 }
-*/
