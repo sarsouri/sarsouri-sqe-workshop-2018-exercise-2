@@ -42,9 +42,7 @@ function functiondeclaration(x){
         let thelet =parseCode(xx[i],false);
         thelet.value=eval(xx[i]);
         thelet=thelet.body[0].expression;
-       //console.log(UnparseCode(thelet));
         parmsmap.set(x.params[i].name,thelet);
-       // console.log(parmsmap);
     }
     for(let i=0;i<x.body.body.length&&!ihavereturn;i++){
         //console.log(x.body.body[i]);
@@ -69,7 +67,6 @@ function f1(x) {
         whilestatment(x);
 }
 function ifstatement(x) {
-   // console.log('213546512132312154');
     //console.log(x.test.operator);
     if (istrue(x.test)){
         //console.log(x.test.loc.end.line);
@@ -86,32 +83,40 @@ function ifstatement(x) {
         }
     }
 }
+/*if (x.expression.type=='UpdateExpression') {
+    let thelet=parmsmap.get(x.expression.argument.name);
+    if (x.expression.operator=='++') {
+        thelet.value = thelet.value + 1;
+    }else {
+        thelet.value = thelet.value - 1;
+    }
+    //colortheline.set(x.expression.argument.loc.start.line, true);
+    parmsmap.set(x.expression.argument.name, thelet);
+}else {
+    let l = t1(x.expression.right);
+    let thelet = parseCode(eval(l).toString(), false);
+
+    thelet = thelet.body[0].expression;
+    //colortheline.set(x.expression.left.loc.start.line, true);
+    parmsmap.set(x.expression.left.name, thelet);
+}*/
 function expressionstatement(x) {
-   // console.log('zhkan7yate');
-   // console.log(x.expression.right);
-    //console.log(t1(x.expression.right));
     let l=t1(x.expression.right);
-    //console.log(l);
-   // console.log(l+'5555555555555555555555');
-    /*while (l.includes(';'))
-        l=l.replace(';','');
-        */
-    //console.log(eval(l)+'*****');
     let thelet =parseCode(eval(l).toString(),false);
     thelet=thelet.body[0].expression;
-    //console.log(thelet);
     parmsmap.set(x.expression.left.name,thelet);
 }
+/*let l=t1(x.expression.right);
+let thelet =parseCode(eval(l).toString(),false);
+thelet=thelet.body[0].expression;
+//console.log(thelet);
+parmsmap.set(x.expression.left.name,thelet);*/
 function returnstatsment() {
     ihavereturn=true;
 }
 function whilestatment(x) {
-    let i=0;
-   /// console.log(x.test);
     while (istrue(x.test)) {
-      //  console.log(parmsmap);
         blockornot(x.body);
-        i++;
     }
 }
 function istrue(x) {
@@ -128,7 +133,6 @@ function istrue(x) {
     if (eval(t)) {
         return true;
     }
-   // console.log('********************');
     return false;
 }
 function blockornot(x) {

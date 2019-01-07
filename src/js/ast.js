@@ -1,11 +1,12 @@
 import {parseCode, UnparseCode} from './code-analyzer';
-import $ from 'jquery';
+//import $ from 'jquery';
 import {iv} from './v';
 export {pv};
 var locmap;
 var parmsmap;
-let letral;
+//let letral;
 function pv(codeToParse,myparms) {
+    //codeToParse= changethestring(codeToParse);
     let parsedCode = parseCode(codeToParse,true);
     //$('#parsedCodeOld').val(JSON.stringify(parsedCode, null, 2));
     locmap = new Map();
@@ -14,12 +15,31 @@ function pv(codeToParse,myparms) {
     let s=UnparseCode(parsedCode);
     let parsecode1=parseCode(s,true);
     var color=iv(parsecode1,myparms,parmsmap);
-    console.log(tostring(color,10));
+    //console.log(tostring(color,10));
     color.set(0,s);
-    let res = p(color,s);
+    //let res = p(color,s);
     return color;
 }
-function tostring(color,n) {
+/*function changethestring(s) {
+    let x=s.split('/n');
+    let i=0;
+    while (i<x.length){
+        console.log(x[i].substring(1,3));
+        console.log(x[i]);
+        if (x[i].substring(1,3)=='++') {
+            console.log(x[i]);
+            x[i]=x[i].indexOf(0)+'='+x[i].indexOf(0)+'+1;'
+            console.log(x[i]);
+        }
+        if (x[i].search('--')!=-1) {
+            console.log(x[i]);
+            x[i]=x[i].indexOf(0)+'='+x[i].indexOf(0)+'-1;'
+            console.log(x[i]);
+        }
+        i++;
+    }
+}*/
+/*function tostring(color,n) {
     var s='{';
     for (let i=1;i<n;i++) {
         if (color.has(i)){
@@ -45,7 +65,7 @@ function p(colors,s) {
         } else res+=xx[i]+'</br>';
     }
     return res;
-}
+}*/
 function settheparams(x) {
 
     //if (x.type == 'Program') {
@@ -119,8 +139,6 @@ function iftrue(x,i) {
     return false;
 }
 function variabledeclaration(x,mymap) {
-    //console.log('invarib');
-    // console.log(mymap.size);
     for (let i=0;i<x.declarations.length;i++){
         if (x.declarations[i].init==null) {
             mymap.set(x.declarations[i].id.name,null);
@@ -153,16 +171,30 @@ function whilestatment(x,mymap) {
 function expressionstatement(x,mymap) {
     // console.log(12);
     //if (x.expression.type=='AssignmentExpression'){
-        if (locmap.has(x.expression.left.name)|| mymap.has(x.expression.left.name)){
-
-            mymap.set(x.expression.left.name,getvalue(x.expression.right,mymap));
-            //x=null;
-        }else {
-            x.expression.right=setvaluebinary(x.expression.right,mymap);
-        }
-    //}
+    if (locmap.has(x.expression.left.name)|| mymap.has(x.expression.left.name)) {
+        mymap.set(x.expression.left.name, getvalue(x.expression.right, mymap));
+    }else {
+        x.expression.right = setvaluebinary(x.expression.right, mymap);
+    }
+    /*}else {
+        x=change(x);
+        x=expressionstatement(x,mymap);
+        //mymap.set(x.argument.name, getvalue(x.argument.name, mymap));
+    }*/
     return x;
 }
+/*function change(x) {
+    let s=x.expression.argument.name+'='+x.expression.argument.name;
+    //x[i]=x[i].indexOf(0)+'='+x[i].indexOf(0)+'+1;'
+    if (x.expression.operator=='++'){
+        s=s+'+1;';
+    }else {
+        s=s+'-1;';
+    }
+    let thelet =parseCode(s,false);
+    thelet=thelet.body[0];
+    return thelet;
+}*/
 function returnstatsment(x,mymap){
     // console.log('***************************');
     /// console.log(13);
@@ -236,8 +268,8 @@ function sd(x,mymap) {
     //let t=UnparseCode(x);
     // console.log(t);
     // console.log(x.type);
-    if (x.type=='Literal') {
-        letral=x;
-    }
+    /* if (x.type=='Literal') {
+       let letral=x;
+    }*/
     return x;
 }
